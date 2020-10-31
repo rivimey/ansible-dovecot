@@ -7,16 +7,6 @@ The role installs Dovecot and configures them to act together as IMAP/SMTP mail 
 virtual database of mailboxes and domains provided by OpenLDAP. Uses Lets Encrypt to generate
 certificates for communication.
 
-## Requirements
-
-You need to define `{{base_domain}}` to keep your passwords stored in password storage. Hostname of
-your mail server will be configured as `mail.{{base_domain}}` unless you override variable
-`{{mail_host}}`.
-
-## Additional configuration
-
-This Ansible role is not able to configure DNS for you. You will need to configure the DNS records.
-
 ## Role Variables
 
 The email domain of this server, as seen by outside world:
