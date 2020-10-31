@@ -56,4 +56,3 @@
     name: {{ dovecot_pgsql_db }}
     collation: utf8_general_ci
   when: "dovecot_pgsql_db is defined"
-

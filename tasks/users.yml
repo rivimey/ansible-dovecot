@@ -32,4 +32,3 @@
     shell: /bin/false
     create_home: yes
     generate_ssh_key: no
-
