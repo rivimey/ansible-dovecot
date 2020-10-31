@@ -1,0 +1,35 @@
+---
+
+#- name: Generate mail service password
+#  set_fact:
+#    dovecot_password: "{{ lookup('passwordstore', '{{base_domain}}/{{dovecot_ldap_user}} create=True') }}"
+
+- name: Create LDAP mail user
+  ldap_entry:
+    state: present
+    dn: 'uid={{dovecot_ldap_user}},{{ldap_dn_services}}'
+    objectClass:
+      - simpleSecurityObject
+      - account
+      - top
+    params:
+      uid: '{{dovecot_ldap_user}}'
+      userPassword: '{{dovecot_password}}'
+  when: dovecot_ldap_enabled
+
+
+- name: Ensure mail group existence
+  group:
+    state: present
+    name: '{{dovecot_group}}'
+
+- name: Ensure mail user existence
+  user:
+    state: present
+    name: '{{dovecot_group}}'
+    home: '{{dovecot_dir_storage}}'
+    group: '{{dovecot_group}}'
+    shell: /bin/false
+    create_home: yes
+    generate_ssh_key: no
+

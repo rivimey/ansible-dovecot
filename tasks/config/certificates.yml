@@ -1,0 +1,28 @@
+---
+- name: Ensure certificate directory existence
+  file:
+    path: '{{dovecot_dir_cert}}'
+    state: directory
+    recurse: yes
+
+- name: Ensure certificate existence
+  register: ssl_certificate_file
+  stat:
+    path: '{{dovecot_dir_cert}}/privkey.pem'
+
+- name: Check certificates
+  shell: certbot certificates --agree-tos -d "{{ dovecot_domain }}"
+  register: ssl_certificate
+  when: ssl_certificate_file.stat.exists == False
+  changed_when: '"Serial Number:" not in ssl_certificate.stdout'
+  ignore_errors: yes
+
+- name: Configure certificates
+  shell: certbot certonly -n --standalone \
+    -m "{{ dovecot_admin_address }}" \
+    --agree-tos -d "{{ dovecot_domain }}" \
+    --http-01-port "{{ certbot_port_challenge_http }}"
+  register: certbot_result
+  when: '"Serial Number:" not in ssl_certificate.stdout'
+  changed_when: '"Keeping" not in certbot_result.stdout'
+  ignore_errors: yes

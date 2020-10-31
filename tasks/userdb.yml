@@ -1,0 +1,59 @@
+---
+
+- name: Start the MySQL service
+  sudo: yes
+  service: 
+    name: mysql 
+    state: started
+    enabled: true
+
+- name: Create Dovecot db user for mysql
+  sudo: yes
+  mysql_user: 
+    name: "{{ dovecot_mysql_user }}" 
+    host: "{{ dovecot_mysql_hostname }}" 
+    password: "{{ dovecot_mysql_password }}"
+    priv: '{{ dovecot_mysql_db }}.*:ALL'
+    state: present
+  when: "dovecot_auth_db = 'mysql'"
+
+- name: Create Dovecot user database in mysql.
+  mysql_db:
+    state: present
+    name: {{ dovecot_mysql_db }}
+    collation: utf8mb4_general_ci
+  when: >
+    - "dovecot_auth_db = 'mysql'"
+    - "dovecot_mysql_db is defined"
+
+- name: Write dovecot sql - create table if exists
+  template:
+    src: dovecot_userdb_mysql.sql.j2
+    dest: /tmp/dovecot_userdb_mysql.sql
+  when: "dovecot_auth_db = 'mysql'"
+
+- name: Create dovecot user table in mysql.
+  mysql_db:
+    state: import
+    db: {{ dovecot_mysql_db }}
+    target: /tmp/dovecot_userdb_mysql.sql
+  when: "dovecot_auth_db = 'mysql'"
+
+
+- name: Create Dovecot db user for pgsql
+  sudo: yes
+  pgsql_user: 
+    name: "{{ dovecot_pgsql_user }}" 
+    host: "{{ dovecot_pgsql_hostname }}" 
+    password: "{{ dovecot_pgsql_password }}"
+    priv: '{{ dovecot_pgsql_db }}.*:ALL'
+    state: present
+  when: "dovecot_auth_db = 'pgsql'"
+
+- name: Create Dovecot user database in pgsql.
+  pgsql_db:
+    state: present
+    name: {{ dovecot_pgsql_db }}
+    collation: utf8_general_ci
+  when: "dovecot_pgsql_db is defined"
+

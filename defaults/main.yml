@@ -1,0 +1,210 @@
+---
+# Email domain, as seen by outside world:
+
+# dovecot_domain: example.org
+# dovecot_password: ytfutfufu
+
+dovecot_core_packages:
+  - dovecot-core
+  - dovecot-imapd
+  - dovecot-pop3d
+  - dovecot-lmtpd
+
+dovecot_packages_extra: []
+#  - dovecot-antispam
+#  - dovecot-solr
+#  - dovecot-gssapi
+#  - dovecot-sieve
+#  - dovecot-managesieved
+
+# Hostname of server
+dovecot_admin_address: 'postmaster@{{dovecot_domain}}'
+
+dovecot_instance_name: dovecote
+# name or ip to listen on for imap, pop etc.
+dovecot_host: 'localhost'
+dovecot_host_address: 'localhost'
+dovecot_server_comment:
+
+# name or ip, and port, of SMTP host to send mail to when needed.
+dovecot_submission_host: localhost
+dovecot_submission_port: 25
+
+# Directories used for the installation:
+dovecot_dir: /etc/dovecot
+dovecot_dir_config: /etc/dovecot/conf.d
+dovecot_dir_cert: /etc/letsencrypt/live
+dovecot_dir_sasl_config: /etc
+dovecot_dir_storage: /srv/mail
+dovecot_dir_storage_is_nfs: no
+dovecot_auth_socket_path: /var/run/dovecot/auth-userdb
+dovecot_sasl_dir_config: /etc
+# Log file dir, for use by log_path et al. Created if defined.
+dovecot_log_dir: /var/log/dovecot
+
+dovecot_ldap_enabled: no
+dovecot_ssl_enabled: no
+
+dovecot_ldap_host: '127.0.0.1'
+dovecot_ldap_user: mail
+dovecot_ldap_bind_dn: 'uid={{dovecot_ldap_user}},{{ldap_dn_services}}'
+dovecot_ldap_dn_services: 'ou=services,dc=ldap'
+
+dovecot_full_filesystem_access: no
+dovecot_idle_check_interval: 30 secs
+
+fail2ban_senderemail: '{{dovecot_admin_address}}'
+
+dovecot_lda_quota_tempfail: no
+dovecot_lda_mailbox_autocreate: no
+dovecot_lda_mailbox_autosubscribe: no
+dovecot_lda_original_recipient_header: X-Original-To
+
+dovecot_ssl_cert: '{{dovecot_dir_cert}}/{{dovecot_domain}}/fullchain.pem'
+dovecot_ssl_key: "{{dovecot_dir_cert}}/{{dovecot_domain}}/privkey.pem"
+
+
+#dovecot_debug: no
+#dovecot_debug_ldap: 0
+#dovecot_sasl_debug: 0
+
+dovecot_maildir_dirty_sync: yes
+dovecot_maildir_stat_dirs: yes
+dovecot_maildir_empty_new: no
+dovecot_maildir_broken_filename_sizes: no
+
+dovecot_mbox_lock_timeout: 5 mins
+dovecot_mbox_dotlock_change_timeout: 2 mins
+dovecot_mbox_dirty_sync: no
+dovecot_mbox_very_dirty_sync: no
+dovecot_mbox_lazy_writes: yes
+
+dovecot_first_valid_uid: 110
+dovecot_last_valid_uid: 120
+dovecot_uid: 112
+dovecot_group: dovecot
+dovecot_user: dovecot
+dovecot_null_user: dovenull
+dovecot_internal_user: dovecot
+
+#dovecot_lmtp:
+#  socket: lmtp
+#  ports:
+#  ssl_ports:
+#
+#dovecot_pop3:
+#  connection_limit: 16
+#  clients: 1024
+#  socket:
+#  ports: [ 110 ]
+#  ssl_ports: [ 995 ]
+#
+#dovecot_imap:
+#  connection_limit: 16
+#  clients: 128
+#  vsz_limit: 256M
+#  socket:
+#  ports: [ 143 ]
+#  ssl_ports: [ 993 ]
+#
+
+# Log files: can be a filename or 'syslog'
+dovecot_log_path: "{{ dovecot_log_dir }}/main.log"
+dovecot_info_log_path: "{{ dovecot_log_dir }}/info.log"
+dovecot_debug_log_path: "{{ dovecot_log_dir }}/debug.log"
+dovecot_syslog_facility: mail
+dovecot_auth_verbose: yes
+dovecot_auth_debug: no
+dovecot_mmap_disable: no
+dovecot_dotlock_use_excl: yes
+
+#dovecot_namespaces:
+# Format of array: tagname, recommended == prefix, containing
+# a dictionary with the following keys. At least one array item
+# must define 'inbox: yes' unless the array is empty.
+#  tag:
+#    # prefix and location are required, others have defaults.
+#    prefix: "#mbox/"    # string
+#    separator: "/"      # string
+#    type: private       # private / public / shared
+#    location: mbox:~/mail:INBOX=/var/mail/%u
+#    inbox: yes          # yes / no
+#    hidden: yes         # yes / no
+#    list: no            # yes / no
+#    disabled:           # yes / no
+#    subscriptions:      # yes / no
+#    ignore_on_failure:  # yes / no
+#    alias_for:          # string
+#    mailboxes:          # array
+#
+# Examples
+#
+#  inbox:
+#    separator: "/"      # string
+#    prefix: "#mbox/"    # string
+#    type: private       # private / public / shared
+#    location: mbox:~/mail:INBOX=/var/mail/%u
+#    inbox: yes          # yes / no
+#    hidden: yes         # yes / no
+#    list: no            # yes / no
+#
+#  rest:
+#    separator: "/"      # string
+#    prefix: "#mbox/"    # string
+#    type: private       # private / public / shared
+#    location: mbox:~/mail:INBOX=/var/mail/%u
+#    inbox: yes          # yes / no
+#    hidden: yes         # yes / no
+#    list: no            # yes / no
+
+######### Authentication #########
+
+# Typically you'd specify your IMAP proxy servers here.
+dovecot_trusted_networks: []
+dovecot_login_greeting: Dovecot ready.
+dovecot_verbose_proctitle: yes
+dovecot_shutdown_clients: yes
+
+dovecot_auth_realms: []
+dovecot_auth_default_realm: "{{ dovecot_auth_realms[0] | default('default') }}"
+dovecot_auth_username_chars: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.-_@'
+dovecot_auth_username_format:  "%Lu"
+dovecot_auth_anonymous_username: anonymous
+dovecot_auth_failure_delay: 2 secs
+dovecot_auth_worker_max_count: 30
+dovecot_disable_plaintext_auth: no
+dovecot_require_ssl_cert: no
+
+# From the list: plain login digest-md5 cram-md5 ntlm rpa apop anonymous gssapi otp skey gss-spnego
+dovecot_auth_mechanisms:
+  - plain
+  - login
+  - cram-md5
+
+dovecot_default_pass_scheme: PLAIN
+
+# Authentication backends: mysql, pgsql, sqlite
+dovecot_auth_db: mysql
+
+dovecot_database: users
+dovecot_db_table: users
+dovecot_db_user: postman
+dovecot_db_password: foo
+
+
+# User/password lookup on local mysql server:
+dovecot_mysql_hostname: "{{ dovecot_db_hostname }}"
+dovecot_mysql_database:  "{{ dovecot_db_database }}"
+dovecot_mysql_table:  "{{ dovecot_db_table }}"
+dovecot_mysql_user:  "{{ dovecot_db_user }}"
+dovecot_mysql_password: "{{ dovecot_db_password }}"
+
+# User/password lookup on local pgsql server:
+dovecot_pgsql_hostname: "{{ dovecot_db_hostname }}"
+dovecot_pgsql_database:  "{{ dovecot_db_database }}"
+dovecot_pgsql_table:  "{{ dovecot_db_table }}"
+dovecot_pgsql_user:  "{{ dovecot_db_user }}"
+dovecot_pgsql_password: "{{ dovecot_db_password }}"
+
+certbot_port_challenge_https: 443
+certbot_port_challenge_http: 80

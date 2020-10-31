@@ -1,0 +1,9 @@
+---
+- name: Configure system services
+  systemd:
+    name: '{{item}}'
+    state: restarted
+    enabled: yes
+    masked: no
+  with_items:
+    - dovecot

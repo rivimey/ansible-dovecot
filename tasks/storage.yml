@@ -1,0 +1,22 @@
+---
+
+- name: Create mail storage
+  file:
+    path: '{{item}}'
+    state: directory
+    owner: '{{dovecot_user}}'
+    group: '{{dovecot_group}}'
+    mode: 0770
+    recurse: yes
+  with_items:
+  - '{{dovecot_dir_storage}}'
+  - '{{dovecot_dir_storage}}/tmp'
+  - '{{dovecot_dir_storage}}/home'
+  - '{{dovecot_dir_storage}}/indexes'
+
+- name: Create log dir, if defined
+  file:
+    path: "{{ dovecot_log_dir }}"
+    state: directory
+    recurse: yes
+  when: dovecot_log_dir is defined and dovecot_log_dir

@@ -1,0 +1,36 @@
+---
+
+- name: Install dovecot
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - "{{ dovecot_core_packages }}"
+
+- name: Install dovecot LDAP
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - dovecot-ldap
+  when: dovecot_ldap_enabled
+
+- name: Install dovecot mysql driver
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - dovecot-mysql
+  when: "dovecot_auth_db == 'mysql'"
+
+- name: Install dovecot pgsql driver
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - dovecot-pgsql
+  when: "dovecot_auth_db == 'pgsql'"
+
+- name: Install dovecot sqlite driver
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - dovecot-sqlite
+  when: "dovecot_auth_db == 'sqlite'"
+
+- name: Install extra dovecot packages
+  action: apt pkg={{ item }} state=present
+  with_items:
+    - "{{ dovecot_packages_extra }}"
+  when: "dovecot_packages_extra is defined"

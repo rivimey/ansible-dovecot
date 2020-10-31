@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Ruth Ivimey-Cook
+  description: Dovecot with SSL and namespaces
+  license: MIT
+  min_ansible_version: 2.4
+  platforms:
+   - name: Ubuntu
+     versions:
+     - all
+
+  galaxy_tags:
+    - dovecot
+    - letsencrypt
+    - mail
+
+dependencies: []
+

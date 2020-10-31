@@ -1,0 +1,10 @@
+
+CREATE TABLE IF NOT EXISTS users (
+     username VARCHAR(128) NOT NULL,
+     domain VARCHAR(128) NOT NULL,
+     password VARCHAR(128) NOT NULL,
+     userid INTEGER NOT NULL,
+     enabled CHAR(1) DEFAULT 'Y' NOT NULL
+);
+
+

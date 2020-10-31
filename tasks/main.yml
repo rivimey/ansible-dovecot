@@ -1,0 +1,23 @@
+---
+
+- name: Include Dovecot OS-Specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install Dovecot.
+  include_tasks: deps.yml
+
+- name: Configure Users.
+  include_tasks: users.yml
+
+- name: Configure mail storage.
+  include_tasks: storage.yml
+
+- name: Configure certificates.
+  include_tasks: config/certificates.yml
+  when: dovecot_ssl_enabled
+
+- name: Configure Dovecot.
+  include_tasks: config/dovecot.yml
+
+- name: Configure Dovecot service.
+  include_tasks: config/services.yml

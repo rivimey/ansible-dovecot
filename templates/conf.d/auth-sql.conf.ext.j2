@@ -1,0 +1,19 @@
+# Authentication for SQL users. Included from auth.conf.
+#
+# [doc/wiki/AuthDatabase.SQL.txt]
+
+passdb {
+  driver = sql
+
+  # Path for SQL configuration file, see example-config/dovecot-sql.conf.ext
+  args = /etc/dovecot/dovecot-sql.conf.ext
+}
+
+# If you don't have any user-specific settings, you can avoid the user_query
+# by using userdb static instead of userdb sql, for example:
+# [doc/wiki/UserDatabase.Static.txt]
+
+userdb {
+  driver = static
+  args = uid={{dovecot_user}} gid={{dovecot_group}} home={{dovecot_dir_storage}}/%d/%n
+}

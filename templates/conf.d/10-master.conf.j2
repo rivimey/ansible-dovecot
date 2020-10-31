@@ -1,0 +1,167 @@
+
+default_process_limit = 100
+default_client_limit = 1000
+
+# Default VSZ (virtual memory size) limit for service processes. This is mainly
+# intended to catch and kill processes that leak memory before they eat up
+# everything.
+default_vsz_limit = 256M
+
+# Login user is internally used by login processes. This is the most untrusted
+# user in Dovecot system. It shouldn't have access to anything at all.
+default_login_user = {{ dovecot_null_user }}
+
+# Internal user is used by unprivileged processes. It should be separate from
+# login user, so that login processes can't disturb other processes.
+default_internal_user = {{ dovecot_internal_user }}
+
+
+# Post Office Protocol ============================
+service pop3-login {
+{% if dovecot_pop3 is defined %}
+  {% if dovecot_pop3.ports is defined %}
+  inet_listener pop3 {
+    address = {{ dovecot_host_address }}
+    port = {{ dovecot_pop3.ports |join(' ') }}
+    ssl = no
+  }
+  {% endif %}
+
+  {% if dovecot_ssl_enabled and dovecot_pop3.ssl_ports is defined %}
+  inet_listener pop3s {
+    address = {{ dovecot_host_address }}
+    port = {{ dovecot_pop3.ssl_ports |join(' ') }}
+    ssl = yes
+  }
+  {% endif %}
+
+  # Number of connections to handle before starting a new process. Typically
+  # the only useful values are 0 (unlimited) or 1. 1 is more secure, but 0
+  # is faster.
+  service_count = {{ dovecot_pop3.connection_limit |default("0") }}
+
+  vsz_limit = 64M
+{% endif %}
+}
+
+service pop3 {
+{% if dovecot_pop3 is defined %}
+  # Max. number of POP3 processes (connections)
+  process_limit = {{ dovecot_imap.clients |default("16") }}
+{% endif %}
+}
+
+
+# Local Message Transport =========================
+service lmtp {
+{% if dovecot_lmtp is defined %}
+  {% if dovecot_lmtp.socket is defined %}
+  unix_listener lmtp {
+    mode = 0666
+    path = {{ dovecot_lmtp.socket |regex_replace('^/var/run/dovecot/(.*)$', '\\1') }}
+  }
+  {% endif %}
+
+  {% if dovecot_lmtp.ports is defined %}
+  # Create inet listener only if you can't use the UNIX socket
+  inet_listener lmtp {
+    {% if dovecot_host_address is defined %}
+    address = {{ dovecot_host_address |join(', ') }}
+    {% endif %}
+    port = {{ dovecot_lmtp.ports |join(' ') }}
+    ssl = no
+  }
+  {% endif %}
+{% endif %}
+}
+
+
+# Internet Message Access Protocol ================
+service imap-login {
+{% if dovecot_imap is defined %}
+{% if dovecot_imap.socket is defined %}
+
+  unix_listener imap {
+    mode = 0666
+    path = {{ dovecot_imap.socket |regex_replace('^/var/run/dovecot/(.*)$', '\\1') }}
+  }
+{% endif %}
+
+{% if dovecot_imap.ports is defined %}
+  inet_listener imap {
+    {% if dovecot_host_address is defined %}
+    address = {{ dovecot_host_address| join(', ') }}
+    {% endif %}
+    port = {{ dovecot_imap.ports |join(' ') }}
+    ssl = no
+  }
+
+{% endif %}
+
+{% if dovecot_ssl_enabled and dovecot_imap.ssl_ports is defined %}
+  inet_listener imaps {
+    {% if dovecot_host_address is defined %}
+    address = {{ dovecot_host_address| join(', ') }}
+    {% endif %}
+    port = {{ dovecot_imap.ssl_ports |join(' ') }}
+    ssl = yes
+  }
+
+{% endif %}
+
+  # Number of connections to handle before starting a new process. Typically
+  # the only useful values are 0 (unlimited) or 1. 1 is more secure, but 0
+  # is faster.
+  service_count = {{ dovecot_imap.connection_limit |default("0") }}
+
+  # Number of processes to always keep waiting for more connections.
+  #process_min_avail = 0
+
+  # If you set service_count=0, you probably need to grow this.
+  vsz_limit = 64M
+
+{% endif %}
+}
+
+service imap {
+{% if dovecot_imap is defined %}
+  # Most of the memory goes to mmap()ing files. You may need to increase this
+  # limit if you have huge mailboxes.
+  vsz_limit = {{ dovecot_imap.vsz_limit |default("64M") }}
+
+  # Max. number of IMAP processes (connections)
+  process_limit = {{ dovecot_imap.clients |default("16") }}
+{% endif %}
+}
+
+
+# Authentication ==================================
+service auth {
+  # auth_socket_path points to this userdb socket by default.
+  unix_listener auth-userdb {
+    #mode = 0666
+    #user = 
+    #group = 
+  }
+
+  # Auth process is run as this user.
+  #user = $default_internal_user
+}
+
+service auth-worker {
+  # Auth worker process is run as root by default, so that it can access
+  # /etc/shadow. If this isn't necessary, the user should be changed to
+  # $default_internal_user.
+  #user = root
+}
+
+
+service dict {
+  # If dict proxy is used, mail processes should have access to its socket.
+  # For example: mode=0660, group=vmail and global mail_access_groups=vmail
+  unix_listener dict {
+    #mode = 0600
+    #user = 
+    #group = 
+  }
+}

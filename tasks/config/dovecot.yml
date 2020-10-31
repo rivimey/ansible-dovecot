@@ -1,0 +1,48 @@
+---
+- name: Create Dovecot configuration directory
+  file:
+    path: '{{dovecot_dir_config}}'
+    state: directory
+
+- name: Configure Dovecot.
+  template:
+    src: '{{ item }}'
+    dest: '{{ dovecot_dir }}/{{ item[:-3] }}'
+  with_items:
+    - "conf.d/10-auth.conf.j2"
+    - "conf.d/10-director.conf.j2"
+    - "conf.d/10-logging.conf.j2"
+    - "conf.d/10-mail.conf.j2"
+    - "conf.d/10-master.conf.j2"
+    - "conf.d/10-ssl.conf.j2"
+    - "conf.d/15-mailboxes.conf.j2"
+    - "conf.d/15-lda.conf.j2"
+    - "conf.d/20-imap.conf.j2"
+    - "conf.d/20-lmtp.conf.j2"
+    - "conf.d/20-pop3.conf.j2"
+    - "conf.d/90-acl.conf.j2"
+    - "conf.d/90-plugin.conf.j2"
+    - "conf.d/90-quota.conf.j2"
+    - "conf.d/auth-deny.conf.ext.j2"
+    - "conf.d/auth-dict.conf.ext.j2"
+    - "conf.d/auth-master.conf.ext.j2"
+    - "conf.d/auth-passwdfile.conf.ext.j2"
+    - "conf.d/auth-sql.conf.ext.j2"
+    - "conf.d/auth-static.conf.ext.j2"
+    - "conf.d/auth-system.conf.ext.j2"
+    - "conf.d/auth-vpopmail.conf.ext.j2"
+    - "dovecot-db.conf.ext.j2"
+    - "dovecot-dict-sql.conf.ext.j2"
+    - "dovecot-sql.conf.ext.j2"
+    - "dovecot.conf.j2"
+    - "master-users.j2"
+  notify:
+    - restart dovecot
+
+- name: Configure dovecot LDAP
+  template:
+    src: 'dovecot/ldap.conf.ext'
+    dest: '{{ dovecot_dir_config }}/ldap.conf.ext'
+  when: dovecot_ldap_enabled
+  notify:
+    - restart dovecot
