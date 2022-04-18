@@ -11,8 +11,8 @@ ssl = {{ dovecot_ssl_enabled |yesno }}
 # root. Included doc/mkcert.sh can be used to easily generate self-signed
 # certificate, just make sure to update the domains in dovecot-openssl.cnf
 
-ssl_cert = <{{dovecot_dir_cert}}/{{dovecot_domain}}/fullchain.pem
-ssl_key = <{{dovecot_dir_cert}}/{{dovecot_domain}}/privkey.pem
+ssl_cert = <{{dovecot_dir_cert}}/{{dovecot_cert_domain | default(dovecot_domain)}}/fullchain.pem
+ssl_key = <{{dovecot_dir_cert}}/{{dovecot_cert_domain | default(dovecot_domain)}}/privkey.pem
 
 # If key file is password protected, give the password here. Alternatively
 # give it when starting dovecot with -p parameter. Since this file is often
@@ -44,10 +44,7 @@ ssl_client_ca_dir = /etc/ssl/certs
 # auth_ssl_username_from_cert=yes.
 #ssl_cert_username_field = commonName
 
-# How often to regenerate the SSL parameters file. Generation is quite CPU
-# intensive operation. The value is in hours, 0 disables regeneration
-# entirely.
-ssl_parameters_regenerate = 72 hours
+ssl_dh=</etc/dovecot/dh.pem
 
 # SSL ciphers to use
 ssl_cipher_list = ALL:!LOW:!MEDIUM:!RC4:!SSLv2:!EXP:!aNULL

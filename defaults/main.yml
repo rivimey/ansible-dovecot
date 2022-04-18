@@ -34,6 +34,9 @@ dovecot_submission_port: 25
 dovecot_dir: /etc/dovecot
 dovecot_dir_config: /etc/dovecot/conf.d
 dovecot_dir_cert: /etc/letsencrypt/live
+
+# Set this if the certificate domain is not the same as the dovecot_domain.
+#dovecot_cert_domain:
 dovecot_dir_sasl_config: /etc
 dovecot_dir_storage: /srv/mail
 dovecot_dir_storage_is_nfs: no

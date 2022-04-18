@@ -11,7 +11,7 @@
     path: '{{dovecot_dir_cert}}/privkey.pem'
 
 - name: Check certificates
-  shell: certbot certificates --agree-tos -d "{{ dovecot_domain }}"
+  shell: certbot certificates --agree-tos -d "{{ dovecot_cert_domain | default(dovecot_domain) }}"
   register: ssl_certificate
   when: ssl_certificate_file.stat.exists == False
   changed_when: '"Serial Number:" not in ssl_certificate.stdout'
@@ -20,7 +20,7 @@
 - name: Configure certificates
   shell: certbot certonly -n --standalone \
     -m "{{ dovecot_admin_address }}" \
-    --agree-tos -d "{{ dovecot_domain }}" \
+    --agree-tos -d "{{ dovecot_cert_domain | default(dovecot_domain) }}" \
     --http-01-port "{{ certbot_port_challenge_http }}"
   register: certbot_result
   when: '"Serial Number:" not in ssl_certificate.stdout'
