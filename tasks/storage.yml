@@ -2,17 +2,16 @@
 
 - name: Create mail storage
   file:
-    path: '{{item}}'
+    path:  '{{ item.path }}'
     state: directory
-    owner: '{{dovecot_user}}'
-    group: '{{dovecot_group}}'
-    mode: 0770
-    recurse: yes
+    owner: '{{ item.user | default( dovecot_user ) }}'
+    group: '{{ item.group | default( dovecot_group ) }}'
+    mode:  '{{ item.mode | default( "0770" ) }}'
   with_items:
-  - '{{dovecot_dir_storage}}'
-  - '{{dovecot_dir_storage}}/tmp'
-  - '{{dovecot_dir_storage}}/home'
-  - '{{dovecot_dir_storage}}/indexes'
+  - { path: '{{ dovecot_dir_storage }}', group: 'mail' }
+  - { path: '{{ dovecot_dir_storage }}/tmp' }
+  - { path: '{{ dovecot_dir_storage }}/home', group: 'mail' }
+  - { path: '{{ dovecot_dir_storage }}/indexes' }
 
 - name: Create log dir, if defined
   file:
